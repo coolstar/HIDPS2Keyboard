@@ -7,13 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F1BBE87B1CC0E28400FBF79B /* HIDPS2Keyboard.hpp in Headers */ = {isa = PBXBuildFile; fileRef = F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.hpp */; };
+		F1B927831CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1B927811CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.cpp */; };
+		F1B927841CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = F1B927821CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.h */; };
+		F1BBE87B1CC0E28400FBF79B /* HIDPS2Keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.h */; };
 		F1BBE87D1CC0E28400FBF79B /* HIDPS2Keyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1BBE87C1CC0E28400FBF79B /* HIDPS2Keyboard.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F1B927811CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HIDPS2KeyboardWrapper.cpp; sourceTree = "<group>"; };
+		F1B927821CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDPS2KeyboardWrapper.h; sourceTree = "<group>"; };
 		F1BBE8771CC0E28400FBF79B /* HIDPS2Keyboard.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HIDPS2Keyboard.kext; sourceTree = BUILT_PRODUCTS_DIR; };
-		F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HIDPS2Keyboard.hpp; sourceTree = "<group>"; };
+		F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HIDPS2Keyboard.h; sourceTree = "<group>"; };
 		F1BBE87C1CC0E28400FBF79B /* HIDPS2Keyboard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HIDPS2Keyboard.cpp; sourceTree = "<group>"; };
 		F1BBE87E1CC0E28400FBF79B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -48,8 +52,10 @@
 		F1BBE8791CC0E28400FBF79B /* HIDPS2Keyboard */ = {
 			isa = PBXGroup;
 			children = (
-				F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.hpp */,
+				F1BBE87A1CC0E28400FBF79B /* HIDPS2Keyboard.h */,
 				F1BBE87C1CC0E28400FBF79B /* HIDPS2Keyboard.cpp */,
+				F1B927811CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.cpp */,
+				F1B927821CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.h */,
 				F1BBE87E1CC0E28400FBF79B /* Info.plist */,
 			);
 			path = HIDPS2Keyboard;
@@ -62,7 +68,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F1BBE87B1CC0E28400FBF79B /* HIDPS2Keyboard.hpp in Headers */,
+				F1BBE87B1CC0E28400FBF79B /* HIDPS2Keyboard.h in Headers */,
+				F1B927841CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1B927831CC16FAC00CD6457 /* HIDPS2KeyboardWrapper.cpp in Sources */,
 				F1BBE87D1CC0E28400FBF79B /* HIDPS2Keyboard.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,6 +276,7 @@
 				F1BBE8831CC0E28400FBF79B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
