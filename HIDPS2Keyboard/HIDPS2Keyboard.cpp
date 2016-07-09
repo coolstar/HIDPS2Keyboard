@@ -21,6 +21,17 @@ typedef struct __attribute__((__packed__)) _HIDPS2_KEYBOARD_REPORT
     
 } HIDPS2KeyboardReport;
 
+typedef struct __attribute__((__packed__)) _HIDPS2_MEDIA_REPORT
+{
+    
+    uint8_t      ReportID;
+    
+    uint8_t	  ControlCode;
+    
+    uint8_t	  Reserved;
+    
+} HIDPS2KeyboardMediaReport;
+
 unsigned char hidps2keyboarddesc[] = {
     //
     // Keyboard report starts here
@@ -58,6 +69,27 @@ unsigned char hidps2keyboarddesc[] = {
     0x29, 0x65,                         //   USAGE_MAXIMUM (Keyboard Application)
     0x81, 0x00,                         //   INPUT (Data,Ary,Abs)
     0xc0,                               // END_COLLECTION
+    
+    0x05, 0x0C, /*		Usage Page (Consumer Devices)		*/
+    0x09, 0x01, /*		Usage (Consumer Control)			*/
+    0xA1, 0x01, /*		Collection (Application)			*/
+    0x85, REPORTID_MEDIA,	/*		Report ID=2							*/
+    0x05, 0x0C, /*		Usage Page (Consumer Devices)		*/
+    0x15, 0x00, /*		Logical Minimum (0)					*/
+    0x25, 0x01, /*		Logical Maximum (1)					*/
+    0x75, 0x01, /*		Report Size (1)						*/
+    0x95, 0x07, /*		Report Count (7)					*/
+    0x09, 0x6F, /*		Usage (Brightess Up)				*/
+    0x09, 0x70, /*		Usage (Brightness Down)				*/
+    0x09, 0xB7, /*		Usage (Stop)						*/
+    0x09, 0xCD, /*		Usage (Play / Pause)				*/
+    0x09, 0xE2, /*		Usage (Mute)						*/
+    0x09, 0xE9, /*		Usage (Volume Up)					*/
+    0x09, 0xEA, /*		Usage (Volume Down)					*/
+    0x81, 0x02, /*		Input (Data, Variable, Absolute)	*/
+    0x95, 0x01, /*		Report Count (1)					*/
+    0x81, 0x01, /*		Input (Constant)					*/
+    0xC0,        /*        End Collection                        */
 };
 
 char* HIDPS2Keyboard::getMatchedName(IOService* provider) {
@@ -723,42 +755,135 @@ void HIDPS2Keyboard::keyPressed() {
     
     updateSpecialKeys(ps2code);
     
+    bool overrideCtrl = false;
+    bool overrideRCtrl = false;
+    bool overrideAlt = false;
+    bool overrideAltGr = false;
+    bool overrideWin = false; // win = cmd
+    bool overrideShift = false;
+    bool mediaKey = false;
+    
+    uint8_t keyScanCodes[KBD_KEY_CODES] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint8_t consumerKey = 0x00;
+    
+    for (int i = 0; i < KBD_KEY_CODES; i++) {
+        keyScanCodes[i] = keyCodes[i];
+#if UseChromeLayout
+        uint8_t keyCode = keyScanCodes[i];
+        if (LeftCtrl) {
+            if (keyCode == 0x2a) {
+                if (!LeftAlt)
+                    overrideCtrl = true;
+                keyScanCodes[i] = 0x4c; //delete (backspace)
+            }
+        } else {
+            if (keyCode == 0x3a) {
+                overrideWin = true;
+                keyScanCodes[i] = 0x2F;
+                //Cmd + [ (F1)
+            }
+            else if (keyCode == 0x3b) {
+                overrideWin = true;
+                keyScanCodes[i] = 0x30;
+                //Cmd + ] (F2)
+            }
+            else if (keyCode == 0x3c) {
+                overrideWin = true;
+                keyScanCodes[i] = 0x15;
+                //Cmd + R (F3)
+            }
+            else if (keyCode == 0x3d) {
+                overrideWin = true;
+                overrideShift = true;
+                keyScanCodes[i] = 0x09;
+                //Cmd + Shift + F (F4)
+            }
+            else if (keyCode == 0x3e) {
+                overrideCtrl = true;
+                keyScanCodes[i] = 0x52;
+                //Ctrl + Up (F5)
+            }
+            else if (keyCode == 0x3f) {
+                mediaKey = true;
+                consumerKey = 0x02;
+                //brightness down (F6)
+            }
+            else if (keyCode == 0x40) {
+                mediaKey = true;
+                consumerKey = 0x01;
+                //brightness up (F7)
+            }
+            else if (keyCode == 0x41) {
+                mediaKey = true;
+                consumerKey = 0x10; //mute (F8)
+            }
+            else if (keyCode == 0x42) {
+                mediaKey = true;
+                consumerKey = 0x40; //volume down (F9)
+            }
+            else if (keyCode == 0x43) {
+                mediaKey = true;
+                consumerKey = 0x20; //volume up (F10)
+            }
+        }
+#endif
+    }
+    
     uint8_t ShiftKeys = 0;
-    if (LeftCtrl)
+    if (LeftCtrl != overrideCtrl)
         ShiftKeys |= KBD_LCONTROL_BIT;
 #if REMAPKEYSLIKEVOODOOPS2
-    if (LeftAlt)
+    if (LeftAlt != overrideWin)
         ShiftKeys |= KBD_LGUI_BIT;
 #else
-    if (LeftAlt)
+    if (LeftAlt != overrideAlt)
         ShiftKeys |= KBD_LALT_BIT;
 #endif
-    if (LeftShift)
+    if (LeftShift != overrideShift)
         ShiftKeys |= KBD_LSHIFT_BIT;
 #if REMAPKEYSLIKEVOODOOPS2
-    if (LeftWin)
+    if (LeftWin != overrideAlt)
         ShiftKeys |= KBD_LALT_BIT;
 #else
-    if (LeftWin)
+    if (LeftWin != overrideWin)
         ShiftKeys |= KBD_LGUI_BIT;
 #endif
     
-    if (RightCtrl)
+    if (RightCtrl != overrideRCtrl)
         ShiftKeys |= KBD_RCONTROL_BIT;
-    if (RightAlt)
+    if (RightAlt != overrideAltGr)
         ShiftKeys |= KBD_RALT_BIT;
     if (RightShift)
         ShiftKeys |= KBD_RSHIFT_BIT;
     
-    update_keyboard(ShiftKeys, keyCodes);
+    if (mediaKey){
+        update_media_key(consumerKey);
+    } else {
+        update_media_key(0x00);
+        update_keyboard(ShiftKeys, keyScanCodes);
+    }
 }
 
-void HIDPS2Keyboard::update_keyboard(uint8_t shiftKeys, uint8_t keyCodes[KBD_KEY_CODES]) {
+void HIDPS2Keyboard::update_media_key(uint8_t consumerKey) {
+    _HIDPS2_MEDIA_REPORT report;
+    report.ReportID = REPORTID_MEDIA;
+    report.ControlCode = consumerKey;
+    IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, sizeof(report));
+    buffer->writeBytes(0, &report, sizeof(report));
+    
+    IOReturn err = _wrapper->handleReport(buffer, kIOHIDReportTypeInput);
+    if (err != kIOReturnSuccess)
+        IOLog("Error handling report: 0x%.8x\n", err);
+    
+    buffer->release();
+}
+
+void HIDPS2Keyboard::update_keyboard(uint8_t shiftKeys, uint8_t keyScanCodes[KBD_KEY_CODES]) {
     _HIDPS2_KEYBOARD_REPORT report;
     report.ReportID = REPORTID_KEYBOARD;
     report.ShiftKeyFlags = shiftKeys;
     for (int i = 0; i < KBD_KEY_CODES; i++){
-        report.KeyCodes[i] = keyCodes[i];
+        report.KeyCodes[i] = keyScanCodes[i];
     }
     
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, sizeof(report));

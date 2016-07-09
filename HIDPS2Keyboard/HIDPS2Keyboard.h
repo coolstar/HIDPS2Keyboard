@@ -10,10 +10,12 @@
 #include <architecture/i386/pio.h>
 
 #define REMAPKEYSLIKEVOODOOPS2 1
+#define UseChromeLayout 0
 
 #define kIOPMPowerOff		0
 
 #define REPORTID_KEYBOARD       0x07
+#define REPORTID_MEDIA       0x08
 
 //
 // Keyboard specific report infomation
@@ -78,6 +80,7 @@ public:
     void removeCode(uint8_t code);
     void addCode(uint8_t code);
     
+    void update_media_key(uint8_t consumerKey);
     void update_keyboard(uint8_t shiftKeys, uint8_t keyCodes[KBD_KEY_CODES]);
     
     int reportDescriptorLength();
