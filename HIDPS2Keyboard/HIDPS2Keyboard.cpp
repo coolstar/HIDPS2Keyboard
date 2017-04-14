@@ -802,9 +802,9 @@ void HIDPS2Keyboard::keyPressed() {
             }
             else if (keyCode == 0x3d) {
                 overrideWin = true;
-                overrideShift = true;
+                overrideCtrl = true;
                 keyScanCodes[i] = 0x09;
-                //Cmd + Shift + F (F4)
+                //Cmd + Ctrl + F (FullScreen) (F4)
             }
             else if (keyCode == 0x3e) {
                 overrideCtrl = true;
