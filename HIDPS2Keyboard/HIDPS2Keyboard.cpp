@@ -772,9 +772,17 @@ void HIDPS2Keyboard::keyPressed() {
         uint8_t keyCode = keyScanCodes[i];
         if (LeftCtrl) {
             if (keyCode == 0x2a) {
-                if (!LeftAlt)
+                if (!LeftAlt && !RightAlt)
                     overrideCtrl = true;
-                keyScanCodes[i] = 0x4c; //delete (backspace)
+                    keyScanCodes[i] = 0x4c; //delete (backspace)
+            }
+            else if (keyCode == 0x52) {
+                overrideCtrl = true;
+                keyScanCodes[i] = 0x4B; //Page Up (Up Arrow)
+            }
+            else if (keyCode == 0x51) {
+                overrideCtrl = true;
+                keyScanCodes[i] = 0x4E; //Page Up (Down Arrow)
             }
         } else {
             if (keyCode == 0x3a) {
