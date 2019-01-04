@@ -73,19 +73,20 @@ unsigned char hidps2keyboarddesc[] = {
     0x05, 0x0C, /*		Usage Page (Consumer Devices)		*/
     0x09, 0x01, /*		Usage (Consumer Control)			*/
     0xA1, 0x01, /*		Collection (Application)			*/
-    0x85, REPORTID_MEDIA,	/*		Report ID=2							*/
+    0x85, REPORTID_MEDIA,	/*		Report ID=2				*/
     0x05, 0x0C, /*		Usage Page (Consumer Devices)		*/
     0x15, 0x00, /*		Logical Minimum (0)					*/
     0x25, 0x01, /*		Logical Maximum (1)					*/
     0x75, 0x01, /*		Report Size (1)						*/
-    0x95, 0x07, /*		Report Count (7)					*/
+    0x95, 0x08, /*		Report Count (8)					*/
     0x09, 0x6F, /*		Usage (Brightess Up)				*/
     0x09, 0x70, /*		Usage (Brightness Down)				*/
-    0x09, 0xB7, /*		Usage (Stop)						*/
+    0x09, 0xB3, /*      Usage (Fast-Forward/ Next Track)    */
     0x09, 0xCD, /*		Usage (Play / Pause)				*/
     0x09, 0xE2, /*		Usage (Mute)						*/
     0x09, 0xE9, /*		Usage (Volume Up)					*/
     0x09, 0xEA, /*		Usage (Volume Down)					*/
+    0x09, 0xB4, /*      Usage (Rewind/Previous Track)       */
     0x81, 0x02, /*		Input (Data, Variable, Absolute)	*/
     0x95, 0x01, /*		Report Count (1)					*/
     0x81, 0x01, /*		Input (Constant)					*/
@@ -769,31 +770,39 @@ void HIDPS2Keyboard::keyPressed() {
         uint8_t keyCode = keyScanCodes[i];
         if (LeftCtrl) {
             if (keyCode == 0x2a) {
-                if (!LeftAlt)
+                if (!LeftAlt && !RightAlt)
                     overrideCtrl = true;
-                keyScanCodes[i] = 0x4c; //delete (backspace)
+                    keyScanCodes[i] = 0x4c; //delete (backspace)
+            }
+            else if (keyCode == 0x52) {
+                overrideCtrl = true;
+                keyScanCodes[i] = 0x4B; //Page Up (Up Arrow)
+            }
+            else if (keyCode == 0x51) {
+                overrideCtrl = true;
+                keyScanCodes[i] = 0x4E; //Page Up (Down Arrow)
             }
         } else {
             if (keyCode == 0x3a) {
-                overrideWin = true;
-                keyScanCodes[i] = 0x2F;
-                //Cmd + [ (F1)
+                mediaKey = true;
+                consumerKey = 0x80;
+                //Rewind/Previous Track (F1)
             }
             else if (keyCode == 0x3b) {
-                overrideWin = true;
-                keyScanCodes[i] = 0x30;
-                //Cmd + ] (F2)
+                mediaKey = true;
+                consumerKey = 0x04;
+                //Fast-Forward/Next Track (F2)
             }
             else if (keyCode == 0x3c) {
-                overrideWin = true;
-                keyScanCodes[i] = 0x15;
-                //Cmd + R (F3)
+                mediaKey = true;
+                consumerKey = 0x08;
+                //Play/Pause (Opens iTunes like on a Mac) (F3)
             }
             else if (keyCode == 0x3d) {
                 overrideWin = true;
-                overrideShift = true;
+                overrideCtrl = true;
                 keyScanCodes[i] = 0x09;
-                //Cmd + Shift + F (F4)
+                //Cmd + Ctrl + F (FullScreen) (F4)
             }
             else if (keyCode == 0x3e) {
                 overrideCtrl = true;
