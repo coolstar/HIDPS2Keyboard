@@ -5,7 +5,7 @@
 #include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/IOLocks.h>
 #include <IOKit/IOCommandGate.h>
-#include <IOKit/IOTimerEventSource.h>
+#include <IOKit/IOInterruptEventSource.h>
 #include <string.h>
 #include <architecture/i386/pio.h>
 
@@ -66,12 +66,12 @@ public:
     IOACPIPlatformDevice *provider;
     
     IOWorkLoop *workLoop;
-    IOTimerEventSource* timerSource;
+    IOInterruptEventSource* interruptSource;
     
     char* getMatchedName(IOService* provider);
-    bool start(IOService *provider);
-    void stop(IOService *provider);
-    IOReturn setPowerState(unsigned long powerState, IOService *whatDevice);
+    virtual bool start(IOService *provider) override;
+    virtual void stop(IOService *provider) override;
+    virtual IOReturn setPowerState(unsigned long powerState, IOService *whatDevice) override;
     void get_input(OSObject* owner, IOTimerEventSource* sender);
     
     void keyPressed();

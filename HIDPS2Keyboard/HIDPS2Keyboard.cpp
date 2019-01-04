@@ -129,15 +129,14 @@ bool HIDPS2Keyboard::start(IOService * provider){
     workLoop->retain();
     
     //got workloop, test here
-    timerSource = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &HIDPS2Keyboard::get_input));
-    if (!timerSource){
-        IOLog("%s", "Timer Err!\n");
+    interruptSource = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &HIDPS2Keyboard::get_input), provider);
+    if (!interruptSource){
+        IOLog("%s", "Interrupt Err!\n");
         stop(provider);
         return false;
     }
     
-    workLoop->addEventSource(timerSource);
-    timerSource->setTimeoutMS(10);
+    workLoop->addEventSource(interruptSource);
     
     IOLog("%s::%s:: Starting!\n", getName(), name);
 
@@ -165,6 +164,8 @@ bool HIDPS2Keyboard::start(IOService * provider){
     
     registerPowerDriver(this, myPowerStates, kMyNumberOfStates);
     
+    interruptSource->enable();
+    
     return true;
 }
 
@@ -173,10 +174,10 @@ void HIDPS2Keyboard::stop(IOService *provider){
     
     destroy_wrapper();
     
-    if (timerSource){
-        timerSource->cancelTimeout();
-        timerSource->release();
-        timerSource = NULL;
+    if (interruptSource){
+        interruptSource->disable();
+        interruptSource->release();
+        interruptSource = NULL;
     }
     
     if (workLoop) {
@@ -192,19 +193,17 @@ void HIDPS2Keyboard::stop(IOService *provider){
 IOReturn HIDPS2Keyboard::setPowerState(unsigned long powerState, IOService *whatDevice){
     if (powerState == 0){
         //Going to sleep
-        if (timerSource){
-            timerSource->cancelTimeout();
-            timerSource->release();
-            timerSource = NULL;
+        if (interruptSource){
+            interruptSource->disable();
         }
         IOLog("::%s::Going to Sleep!\n",getName());
     } else {
         //Waking up from Sleep
-        if (!timerSource){
-            timerSource = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &HIDPS2Keyboard::get_input));
-            workLoop->addEventSource(timerSource);
-            timerSource->setTimeoutMS(10);
+        if (interruptSource){
+            interruptSource->enable();
         }
+        outb(0x60, 0xff);
+        outb(0x60, 0xf4);
         IOLog("::%s::Resuming from Sleep!\n",getName());
     }
    
@@ -235,13 +234,11 @@ void HIDPS2Keyboard::destroy_wrapper(void) {
 
 void HIDPS2Keyboard::get_input(OSObject* owner, IOTimerEventSource* sender) {
     int ps2code = inb(0x60);
-    if (ps2code == lastps2code){
-        timerSource->setTimeoutMS(10);
+    /*if (ps2code == lastps2code){
         return;
-    }
+    }*/
     lastps2code = ps2code;
     keyPressed();
-    timerSource->setTimeoutMS(10);
 }
 
 void HIDPS2Keyboard::updateSpecialKeys(int ps2code) {

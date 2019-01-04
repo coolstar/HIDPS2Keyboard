@@ -46,10 +46,6 @@ IOReturn HIDPS2KeyboardWrapper::setReport(IOMemoryDescriptor *report, IOHIDRepor
 }
 
 IOReturn HIDPS2KeyboardWrapper::getReport(IOMemoryDescriptor *report, IOHIDReportType reportType, IOOptionBits options) {
-    if (reportType == kIOHIDReportTypeOutput){
-        GetOwner(this)->write_report_to_buffer(report);
-        return kIOReturnSuccess;
-    }
     return kIOReturnUnsupported;
 }
 
